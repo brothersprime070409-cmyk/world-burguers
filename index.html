@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>world_burguersmx</title>
+<meta name="description" content="world_burguersmx: hamburguesas argentinas urbanas en Tuxtla Gutiérrez. Pide en minutos, elige tu combo y recíbelo en tu zona. Carne jugosa, sabor que se nota.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --black:#161512;--blue:#2A4FC2;--cream:#F3E9D8;--orange:#E8742C;--brown:#6B4226;
+  --ink:#201C16;--line:rgba(243,233,216,.14);--muted:#B9B2A4;--head:"Bebas Neue",system-ui,sans-serif;--menu-f:"Inter",system-ui,sans-serif;
+  background:var(--black);
+}
+*{box-sizing:border-box;}
+html,body{background:var(--black);}
+body{margin:0;color:var(--cream);font-family:var(--menu-f);line-height:1.55;}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px;}
+a{color:inherit;}
+h1,h2,h3{font-family:var(--head);font-weight:400;letter-spacing:.01em;}
+
+#loader{position:fixed;inset:0;background:var(--black);z-index:999;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#loader .bar{width:180px;height:14px;border-radius:7px;background:linear-gradient(90deg,#2a2722,#3a362f,#2a2722);background-size:200% 100%;animation:shimmer 1.2s ease-in-out infinite;}
+#loader .bar:nth-child(2){width:120px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@media(prefers-reduced-motion:reduce){#loader .bar{animation:none;}}
+
+nav.menu-nav{position:sticky;top:0;z-index:10;background:var(--blue);padding:12px 0;}
+nav.menu-nav .wrap{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;}
+nav.menu-nav a{font-family:var(--head);font-size:1.05rem;letter-spacing:.03em;text-decoration:none;transition:font-weight .15s ease;}
+nav.menu-nav a:hover{font-weight:700;}
+
+header.hero{padding:70px 0 56px;border-bottom:3px solid var(--brown);}
+.hero-grid{display:flex;gap:40px;align-items:center;flex-wrap:wrap-reverse;}
+.hero-text{flex:1 1 320px;}
+.kicker{color:var(--orange);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem;margin:0 0 14px;}
+h1{font-size:clamp(2.6rem,8vw,4.2rem);line-height:.95;margin:0 0 16px;}
+header.hero p{color:var(--muted);max-width:28em;margin:0 0 28px;font-size:1rem;}
+.hero-pic{flex:1 1 280px;aspect-ratio:1/1;max-width:300px;margin:0 auto;}
+
+.cta-btn,.submit,.comm-btn{transition:filter .2s ease,box-shadow .2s ease,transform .15s ease;}
+.cta-btn:hover,.submit:hover{filter:brightness(.82);box-shadow:0 0 0 2px rgba(232,116,44,.5),0 0 20px rgba(232,116,44,.55);transform:translateY(-1px);}
+.cta-btn{display:inline-block;background:var(--orange);color:var(--black);font-weight:700;padding:15px 32px;border-radius:8px;text-decoration:none;font-family:var(--head);font-size:1.2rem;letter-spacing:.02em;}
+
+.foodsvg{width:100%;height:100%;color:var(--orange);}
+
+section{padding:56px 0;border-bottom:1px solid var(--line);}
+h2{font-size:clamp(1.7rem,4.5vw,2.3rem);margin:0 0 8px;}
+.lead{color:var(--muted);margin:0 0 32px;max-width:32em;}
+.cat-title{color:var(--orange);font-family:var(--head);font-size:1.2rem;letter-spacing:.03em;margin:34px 0 18px;border-bottom:2px solid var(--brown);padding-bottom:6px;}
+.cat-title:first-of-type{margin-top:0;}
+
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px;margin-bottom:12px;}
+.food-card{background:#1D1A15;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;}
+.food-card:hover{transform:translateY(-6px);box-shadow:0 22px 34px -16px rgba(232,116,44,.5);}
+.food-card .pic{aspect-ratio:4/3;background:linear-gradient(150deg,#2A251E,#1C1A16);display:flex;align-items:center;justify-content:center;padding:16px;}
+.food-card .pic svg{width:75%;height:75%;}
+.food-card .info{padding:16px 18px 22px;}
+.food-card h3{font-family:var(--menu-f);font-weight:700;font-size:1.3rem;margin:0 0 8px;}
+.food-card p.desc{color:var(--muted);font-size:1rem;margin:0 0 12px;}
+.food-card .price{color:var(--orange);font-weight:700;font-size:1.4rem;}
+
+.steps{display:flex;gap:20px;flex-wrap:wrap;}
+.step{flex:1 1 220px;background:var(--cream);color:var(--ink);border-radius:10px;padding:20px;}
+.step b{display:block;color:var(--orange);font-family:var(--head);font-size:1.3rem;margin-bottom:6px;}
+.order-picks{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px;font-size:.92rem;}
+.order-picks label{display:flex;gap:8px;align-items:center;}
+.step textarea{width:100%;padding:10px;border-radius:6px;border:1px solid #cbbfa6;font:inherit;resize:vertical;min-height:60px;}
+.submit{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:12px 18px;font-weight:700;font:inherit;cursor:pointer;margin-top:4px;}
+
+.delivery-grid{display:flex;gap:24px;flex-wrap:wrap;}
+.delivery-grid > div{flex:1 1 220px;background:rgba(42,79,194,.18);border:1px solid var(--line);border-radius:10px;padding:18px;}
+.delivery-grid h4{margin:0 0 6px;color:var(--orange);font-size:.95rem;font-family:var(--head);letter-spacing:.02em;}
+.delivery-grid p{margin:0;color:var(--muted);font-size:.9rem;}
+
+.loc-grid{display:flex;gap:28px;flex-wrap:wrap;align-items:center;}
+.loc-grid:nth-of-type(even){flex-direction:row-reverse;}
+.loc-grid > div{flex:1 1 300px;}
+iframe{width:100%;height:260px;border:0;border-radius:10px;}
+.info div{margin-bottom:10px;}
+.info h4{margin:0 0 2px;color:var(--orange);font-size:.9rem;font-family:var(--head);letter-spacing:.02em;}
+.info p{margin:0;color:var(--muted);font-size:.9rem;}
+
+.reviews-box{max-width:520px;}
+.stars-pick{display:flex;gap:6px;margin-bottom:14px;flex-direction:row-reverse;}
+.stars-pick input{position:absolute;opacity:0;width:1px;height:1px;}
+.stars-pick label{font-size:1.9rem;color:var(--line);cursor:pointer;border-radius:4px;}
+.stars-pick input:checked ~ label,.stars-pick label:hover,.stars-pick label:hover ~ label{color:var(--orange);}
+.stars-pick input:focus-visible ~ label{outline:2px solid var(--orange);outline-offset:2px;}
+form.review{display:flex;flex-direction:column;gap:12px;}
+input[type=text],.review textarea{width:100%;padding:11px 13px;border-radius:7px;border:1px solid var(--line);background:#201C16;color:var(--cream);font:inherit;}
+.review textarea{resize:vertical;min-height:80px;}
+.review-list{list-style:none;margin:24px 0 0;padding:0;}
+.review-list li{background:#1D1A15;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.review-list .who{font-weight:700;}
+.review-list .stars{color:var(--orange);letter-spacing:2px;}
+
+.contact-grid{display:flex;gap:16px;flex-wrap:wrap;}
+.comm-btn{flex:1 1 200px;display:flex;align-items:center;gap:10px;justify-content:center;border-radius:8px;padding:15px;font-weight:700;text-decoration:none;}
+.comm-btn:hover{transform:scale(1.03);box-shadow:0 0 24px rgba(243,233,216,.35);filter:none;}
+.comm-btn.wa{background:#25D366;color:#0c1f12;}
+.comm-btn.mail{background:var(--cream);color:var(--ink);}
+
+footer{padding:26px 0;text-align:center;color:var(--muted);font-size:.85rem;}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.is-visible{opacity:1;transform:none;}
+.drop{opacity:0;transform:translateY(-32px);transition:opacity .6s ease,transform .6s ease;}
+.drop.is-visible{opacity:1;transform:none;}
+@media(prefers-reduced-motion:reduce){.reveal,.drop{opacity:1!important;transform:none!important;transition:none!important;}}
+
+@media(max-width:600px){
+  .loc-grid,.loc-grid:nth-of-type(even){flex-direction:column;gap:14px;}
+  .food-grid{grid-template-columns:1fr 1fr;gap:12px;}
+  nav.menu-nav .wrap{gap:14px;font-size:.9rem;}
+}
+@media(max-width:400px){.food-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="loader" aria-hidden="true"><div class="bar"></div><div class="bar"></div></div>
+
+<nav class="menu-nav"><div class="wrap">
+  <a href="#hamburguesas">Hamburguesas</a>
+  <a href="#combos">Combos</a>
+  <a href="#papas">Papas</a>
+  <a href="#bebidas">Bebidas</a>
+  <a href="#extras">Extras</a>
+</div></nav>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div class="hero-text">
+    <p class="kicker">world_burguersmx · Tuxtla Gutiérrez</p>
+    <h1>Hamburguesas argentinas, sabor de barrio porteño</h1>
+    <p>Carne jugosa, pan tostado y esa receta que se arma para compartir con amigos. Pide en minutos, directo a tu mesa o a tu puerta.</p>
+    <a class="cta-btn" href="#pedido">Ordenar ahora</a>
+  </div>
+  <div class="hero-pic">
+    <svg class="foodsvg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+      <path d="M12 40c0-10 17-18 38-18s38 8 38 18" fill="#E8742C" fill-opacity=".9"/>
+      <rect x="10" y="40" width="80" height="8" rx="4" fill="#3B2A1E"/>
+      <rect x="10" y="50" width="80" height="7" rx="3" fill="#6B4226"/>
+      <rect x="10" y="59" width="80" height="7" rx="3" fill="#D8C27A"/>
+      <path d="M10 68c0 10 17 18 40 18s40-8 40-18" fill="#F3E9D8" fill-opacity=".9"/>
+    </svg>
+  </div>
+</div></header>
+
+<section id="hamburguesas" class="reveal"><div class="wrap">
+  <h2>Nuestro menú</h2>
+  <p class="lead">Precios claros, ingredientes de verdad.</p>
+
+  <p class="cat-title">Hamburguesas</p>
+  <div class="food-grid">
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 28c0-9 18-15 42-15s42 6 42 15" fill="#E8742C"/><rect x="6" y="28" width="88" height="7" fill="#3B2A1E"/><rect x="6" y="37" width="88" height="6" fill="#6B4226"/><path d="M6 45c0 9 18 15 44 15s44-6 44-15" fill="#F3E9D8"/></svg></div>
+      <div class="info"><h3>Porteña Clásica</h3><p class="desc">Carne 150g, queso cheddar, lechuga, tomate y nuestra salsa criolla</p><p class="price">$95</p></div>
+    </div>
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 28c0-9 18-15 42-15s42 6 42 15" fill="#E8742C"/><rect x="6" y="28" width="88" height="7" fill="#3B2A1E"/><rect x="6" y="37" width="88" height="6" fill="#6B4226"/><path d="M6 45c0 9 18 15 44 15s44-6 44-15" fill="#F3E9D8"/></svg></div>
+      <div class="info"><h3>Doble Carne</h3><p class="desc">Dos carnes de 120g, doble queso, panceta crocante y cebolla caramelizada</p><p class="price">$135</p></div>
+    </div>
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 28c0-9 18-15 42-15s42 6 42 15" fill="#E8742C"/><rect x="6" y="28" width="88" height="7" fill="#3B2A1E"/><rect x="6" y="37" width="88" height="6" fill="#6B4226"/><path d="M6 45c0 9 18 15 44 15s44-6 44-15" fill="#F3E9D8"/></svg></div>
+      <div class="info"><h3>Huevo y Panceta</h3><p class="desc">Carne 150g, huevo frito, panceta y mayonesa casera</p><p class="price">$110</p></div>
+    </div>
+  </div>
+
+  <p class="cat-title" id="combos">Combos</p>
+  <div class="food-grid">
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 28c0-9 18-15 42-15s42 6 42 15" fill="#E8742C"/><rect x="6" y="28" width="88" height="7" fill="#3B2A1E"/><rect x="6" y="37" width="88" height="6" fill="#6B4226"/><path d="M6 45c0 9 18 15 44 15s44-6 44-15" fill="#F3E9D8"/></svg></div>
+      <div class="info"><h3>Combo Amigos</h3><p class="desc">Porteña Clásica + papas grandes + bebida de 500ml</p><p class="price">$130</p></div>
+    </div>
+  </div>
+
+  <p class="cat-title" id="papas">Papas</p>
+  <div class="food-grid">
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><rect x="30" y="10" width="40" height="50" rx="4" fill="#2A4FC2"/><path d="M36 14v-6M46 14v-8M56 14v-6M64 14v-8" stroke="#E8742C" stroke-width="5"/></svg></div>
+      <div class="info"><h3>Papas a la Provenzal</h3><p class="desc">Crocantes, con ajo, perejil y un toque de limón</p><p class="price">$55</p></div>
+    </div>
+  </div>
+
+  <p class="cat-title" id="bebidas">Bebidas</p>
+  <div class="food-grid">
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><path d="M38 12h24l-5 46a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4z" fill="#2A4FC2"/></svg></div>
+      <div class="info"><h3>Limonada de la casa</h3><p class="desc">Limón recién exprimido, menta fresca</p><p class="price">$35</p></div>
+    </div>
+  </div>
+
+  <p class="cat-title" id="extras">Extras</p>
+  <div class="food-grid">
+    <div class="food-card drop">
+      <div class="pic"><svg class="foodsvg" viewBox="0 0 100 70" fill="none" stroke="currentColor" stroke-width="2"><circle cx="50" cy="35" r="22" fill="#6B4226"/></svg></div>
+      <div class="info"><h3>Salsa criolla extra</h3><p class="desc">Nuestra receta tradicional, para llevar aparte</p><p class="price">$15</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="pedido" class="reveal"><div class="wrap">
+  <h2>Ordena en 3 pasos</h2>
+  <p class="lead">Simple, sin complicaciones.</p>
+  <div class="steps">
+    <div class="step drop">
+      <b>1</b>
+      <p>Elige tus productos</p>
+      <div class="order-picks">
+        <label><input type="checkbox" value="Porteña Clásica"> Porteña Clásica — $95</label>
+        <label><input type="checkbox" value="Doble Carne"> Doble Carne — $135</label>
+        <label><input type="checkbox" value="Huevo y Panceta"> Huevo y Panceta — $110</label>
+        <label><input type="checkbox" value="Combo Amigos"> Combo Amigos — $130</label>
+        <label><input type="checkbox" value="Papas a la Provenzal"> Papas a la Provenzal — $55</label>
+        <label><input type="checkbox" value="Limonada de la casa"> Limonada de la casa — $35</label>
+        <label><input type="checkbox" value="Salsa criolla extra"> Salsa criolla extra — $15</label>
+      </div>
+    </div>
+    <div class="step drop">
+      <b>2</b>
+      <p>Indica tu dirección</p>
+      <textarea id="addr" placeholder="Calle, número, colonia y referencias"></textarea>
+    </div>
+    <div class="step drop">
+      <b>3</b>
+      <p>Confirma tu pedido</p>
+      <p style="font-size:.85rem;color:#5c5346;">Se abrirá WhatsApp con tu pedido ya armado, listo para enviar.</p>
+      <button class="submit" id="confirmOrder" type="button">Confirmar pedido</button>
+    </div>
+  </div>
+</div></section>
+
+<section id="envios" class="reveal"><div class="wrap">
+  <h2>Información de envío</h2>
+  <p class="lead">Para que sepas qué esperar antes de pedir.</p>
+  <div class="delivery-grid">
+    <div><h4>Zonas de cobertura</h4><p>Centro, Las Américas y Terán. Fuera de estas zonas, consúltanos por WhatsApp.</p></div>
+    <div><h4>Costo de entrega</h4><p>$25 dentro de zona de cobertura. Pedidos mayores a $200, envío gratis.</p></div>
+    <div><h4>Horario de entregas</h4><p>Todos los días, de 1pm a 10pm.</p></div>
+    <div><h4>Tiempo estimado</h4><p>Entre 30 y 50 minutos según tu zona y la demanda del momento; puede variar en horas pico.</p></div>
+  </div>
+</div></section>
+
+<section id="ubicacion" class="reveal"><div class="wrap">
+  <h2>Horario y ubicación</h2>
+  <div class="loc-grid">
+    <div>
+      <iframe src="https://www.google.com/maps?q=Tuxtla%20Gutierrez%20Chiapas%20centro&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <div class="info">
+      <div><h4>Dirección</h4><p>Calle Palma Areca 409, Tuxtla Gutiérrez, Chiapas</p></div>
+      <div><h4>Horario</h4><p>Lunes a domingo, 1pm a 11pm</p></div>
+      <div><h4>Ambiente</h4><p>Mesas largas pensadas para grupos, ideal para ir con amigos</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="opiniones" class="reveal"><div class="wrap">
+  <h2>Déjanos tu opinión</h2>
+  <p class="lead" id="revSummary">Cargando valoraciones...</p>
+  <div class="reviews-box">
+    <form class="review" id="reviewForm">
+      <div class="stars-pick">
+        <input type="radio" name="rating" id="r5" value="5"><label for="r5">★</label>
+        <input type="radio" name="rating" id="r4" value="4"><label for="r4">★</label>
+        <input type="radio" name="rating" id="r3" value="3"><label for="r3">★</label>
+        <input type="radio" name="rating" id="r2" value="2"><label for="r2">★</label>
+        <input type="radio" name="rating" id="r1" value="1"><label for="r1">★</label>
+      </div>
+      <input type="text" id="revName" placeholder="Tu nombre" required>
+      <textarea id="revText" placeholder="Cuéntanos tu experiencia" required></textarea>
+      <button class="submit" type="submit">Enviar opinión</button>
+    </form>
+    <p id="revThanks" style="display:none;color:var(--orange);font-weight:700;margin-top:14px;">¡Gracias por tu opinión! Ya quedó registrada.</p>
+  </div>
+</div></section>
+
+<section id="contacto" class="reveal" style="border-bottom:none;"><div class="wrap">
+  <h2>Contáctanos</h2>
+  <p class="lead">Dudas, pedidos grandes o reservas de grupo.</p>
+  <div class="contact-grid">
+    <a class="comm-btn wa" href="https://wa.me/529611340680?text=Hola%2C%20quiero%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer">✆ WhatsApp</a>
+    <a class="comm-btn mail" href="mailto:worldburguersmx@gmail.com?subject=Consulta%20desde%20la%20web">✉ worldburguersmx@gmail.com</a>
+  </div>
+</div></section>
+
+<footer>world_burguersmx &copy; 2026</footer>
+
+<script>
+window.addEventListener("load", function(){
+  var l = document.getElementById("loader");
+  l.style.opacity = "0";
+  setTimeout(function(){ l.style.display = "none"; }, 400);
+});
+
+document.getElementById("confirmOrder").addEventListener("click", function(){
+  var picked = Array.from(document.querySelectorAll('.order-picks input:checked')).map(function(c){return c.value;});
+  var addr = document.getElementById("addr").value.trim();
+  if(picked.length === 0 || !addr){ alert("Elige al menos un producto e indica tu dirección."); return; }
+  var msg = "Hola, quiero pedir: " + picked.join(", ") + ". Mi dirección es: " + addr;
+  window.open("https://wa.me/529611340680?text=" + encodeURIComponent(msg), "_blank");
+});
+
+var sbClient = window.supabase.createClient(
+  "https://tafmcnrauwvvbhvwnjlz.supabase.co",
+  "sb_publishable_Vg2fBaHwJ9qfIyRc92DI6w_xHWTeKCd"
+);
+
+function cargarResumen(){
+  sbClient.from("opiniones_resumen").select("*").single().then(function(res){
+    var el = document.getElementById("revSummary");
+    if(res.error || !res.data || !res.data.total){
+      el.textContent = "Sé el primero en dejar tu opinión.";
+      return;
+    }
+    el.textContent = res.data.promedio + " de 5 estrellas · basado en " + res.data.total + (res.data.total === 1 ? " opinión" : " opiniones");
+  });
+}
+cargarResumen();
+
+document.getElementById("reviewForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  var form = this;
+  var rating = document.querySelector('input[name="rating"]:checked');
+  var name = document.getElementById("revName").value.trim();
+  var text = document.getElementById("revText").value.trim();
+  if(!rating || !name || !text) return;
+  var row = { nombre: name, comentario: text, numero: Number(rating.value) };
+  sbClient.from("opiniones").insert(row).then(function(res){
+    if(res.error){ alert("No se pudo guardar tu opinión. Intenta de nuevo."); console.error(res.error); return; }
+    form.style.display = "none";
+    document.getElementById("revThanks").style.display = "block";
+    cargarResumen();
+  });
+});
+
+if("IntersectionObserver" in window){
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){ entry.target.classList.add("is-visible"); obs.unobserve(entry.target); }
+    });
+  }, {threshold:0.12});
+  document.querySelectorAll(".reveal,.drop").forEach(function(el){ obs.observe(el); });
+} else {
+  document.querySelectorAll(".reveal,.drop").forEach(function(el){ el.classList.add("is-visible"); });
+}
+</script>
+
+</body>
+</html>
